@@ -30,7 +30,7 @@ void setup() {
   pinMode(trigPin1, OUTPUT);
   pinMode(echoPin1, INPUT);
 
-  //steering.attach(10);
+  steering.attach(10);
 }
 
 void loop() {
@@ -61,29 +61,23 @@ void loop() {
   {
     long dist = getDistance();
     Serial.println(dist);
-    if(dist < 50.0) {
+    if(dist < 20.0) {
       count++;
       if (!stopped && count >= 3) {
         brake();
         stopped = true;
       }
+      turnRight();
     }
     else {
       speed = 255;
       stopped = false;
+      center();
     }
 
     digitalWrite(motor1pin1, LOW);
     digitalWrite(motor1pin2, HIGH);
     analogWrite(11, speed);
-
-//    turnLeft();
-//    delay(2000);
-//    center();
-//    delay(2000);
-//    turnRight();
-//    delay(2000);
-//    center();
   }  
 }
 
