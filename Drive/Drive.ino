@@ -9,9 +9,12 @@ int ch2;
 int motor1pin1 = 7;
 int motor1pin2 = 8;
 long duration;
+int prevDist = 0;
 
 bool manual = false;
 bool stopped = false;
+
+int targetDist = 20;
 
 Servo steering;
 
@@ -34,50 +37,60 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  
       
   // ch2 = map(ch2, 995, 1990, 0, 255);
 
   if (manual)
   {
-    ch2 = pulseIn(7, HIGH);
+    ch2 = pulseIn(5, HIGH);
     Serial.println(ch2);
     if (ch2 > 1480) {
       ch2  = map(ch2, 1480, 1980, 0, 255);
       digitalWrite(motor1pin1, LOW);
       digitalWrite(motor1pin2, HIGH);
-      analogWrite(9, ch2);
+      analogWrite(11, ch2);
     }
-    else if (ch2 < 1470) {
+    else if (ch2 < 1460) {
       ch2 = map(ch2, 1050, 1470, 0 , 255);
       digitalWrite(motor1pin1, HIGH);
       digitalWrite(motor1pin2, LOW);
       analogWrite(11, ch2);
     }
+    else{
+      digitalWrite(motor1pin1, 0);
+      digitalWrite(motor1pin2, 0);
+      analogWrite(11, 255);
+    }
+    
   }
 
   else
   {
     long dist = getDistance();
     Serial.println(dist);
-    if(dist < 20.0) {
+    if(abs(dist - prevDist) > targetDist)
+    {
+      count = 0;
+    }
+    if(dist < targetDist) {
       count++;
-      if (!stopped && count >= 3) {
+      if (!stopped && count >= 10) {
         brake();
         stopped = true;
+        targetDist = 40;
       }
-      turnRight();
+      //turnRight();
     }
     else {
-      speed = 255;
+      speed = 150;
       stopped = false;
-      center();
+      targetDist = 30;
     }
 
     digitalWrite(motor1pin1, LOW);
     digitalWrite(motor1pin2, HIGH);
     analogWrite(11, speed);
+    prevDist = dist;
   }  
 }
 
@@ -109,6 +122,10 @@ void center() {
 }
 
 void brake() {
+  digitalWrite(motor1pin1, HIGH);
+  digitalWrite(motor1pin2, LOW);
+  analogWrite(11, 230);
+  delay(200);
   speed = 0;
 
   count = 0;
