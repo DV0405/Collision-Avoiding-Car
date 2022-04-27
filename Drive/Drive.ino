@@ -11,10 +11,12 @@ int motor1pin2 = 8;
 long duration;
 int prevDist = 0;
 
-bool manual = false;
+bool manual = true;
 bool stopped = false;
 
 int targetDist = 20;
+
+int throttleCounter = 10;
 
 Servo steering;
 
@@ -82,7 +84,16 @@ void loop() {
       //turnRight();
     }
     else {
-      speed = 150;
+      if(throttleCounter > 10){
+        Serial.println("drive");
+        throttleCounter = 0;
+        speed = 200;
+      }
+      else
+      {
+        speed = 50;
+      }
+    
       stopped = false;
       targetDist = 30;
     }
@@ -90,6 +101,7 @@ void loop() {
     digitalWrite(motor1pin1, LOW);
     digitalWrite(motor1pin2, HIGH);
     analogWrite(11, speed);
+    throttleCounter += 1;
     prevDist = dist;
   }  
 }
