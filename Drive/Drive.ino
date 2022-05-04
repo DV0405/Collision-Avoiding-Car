@@ -11,7 +11,7 @@ int motor1pin2 = 8;
 long duration;
 int prevDist = 0;
 
-bool manual = true;
+bool manual = false;
 bool stopped = false;
 
 int targetDist = 20;
@@ -98,6 +98,15 @@ void loop() {
       targetDist = 30;
     }
 
+    turnRight();
+    delay(1000);
+    center();
+    delay(1000);
+    turnLeft();
+    delay(1000);
+
+    Serial.println("pos: " + steering.read());
+    
     digitalWrite(motor1pin1, LOW);
     digitalWrite(motor1pin2, HIGH);
     analogWrite(11, speed);
