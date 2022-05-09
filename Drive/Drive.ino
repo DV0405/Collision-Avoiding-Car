@@ -15,7 +15,8 @@ bool manual = false;
 bool stopped = false;
 
 int targetDist = 20;
-
+// 0 = center 1 = right -1 = left
+int steerDir = 0;
 int throttleCounter = 10;
 
 Servo steering;
@@ -81,38 +82,55 @@ void loop() {
         stopped = true;
         targetDist = 40;
       }
-      //turnRight();
     }
     else {
-      if(throttleCounter > 10){
+      
+      if(throttleCounter > 20){
         Serial.println("drive");
         throttleCounter = 0;
         speed = 200;
       }
       else
       {
-        speed = 50;
+        speed = 70;
       }
     
       stopped = false;
       targetDist = 30;
+      
+      steerDir = 0;
+      
+      setDir(true);
+
+      analogWrite(11, speed);
     }
 
-    turnRight();
-    delay(1000);
-    center();
-    delay(1000);
-    turnLeft();
-    delay(1000);
-
-    Serial.println("pos: " + steering.read());
+    checkSteer();
     
-    digitalWrite(motor1pin1, LOW);
-    digitalWrite(motor1pin2, HIGH);
-    analogWrite(11, speed);
     throttleCounter += 1;
     prevDist = dist;
-  }  
+  } 
+
+  
+}
+
+
+
+void setDir(boolean forward)
+{
+  // Forward
+  if(forward)
+  {
+    digitalWrite(motor1pin1, LOW);
+    digitalWrite(motor1pin2, HIGH);
+  }
+  // Reverse
+  else
+  {
+    digitalWrite(motor1pin1, HIGH);
+    digitalWrite(motor1pin2, LOW);
+  }
+  
 }
 
 int getDistance()
@@ -131,15 +149,31 @@ int getDistance()
 }
 
 void turnRight() {
-  steering.write(-90);
+  steering.write(5);
 }
 
 void turnLeft() {
-  steering.write(105);
+  steering.write(75);
 }
 
 void center() {
-  steering.write(85);
+  steering.write(37);
+}
+
+void checkSteer()
+{
+  switch(steerDir)
+  {
+    case 0:
+      center();
+      break;
+    case 1:
+      turnRight();
+      break;
+    case -1:
+      turnLeft();
+      break;
+  }
 }
 
 void brake() {
@@ -149,5 +183,14 @@ void brake() {
   delay(200);
   speed = 0;
 
+  steerDir = -1;
+
+  checkSteer();
+    
   count = 0;
+
+  setDir(false);
+  speed = 150;
+  analogWrite(11, speed);
+  delay(1000);
 }
